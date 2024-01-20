@@ -23,17 +23,17 @@ def delete_data_from_database(database_file, model_id, data_id):
     # Check if any rows were affected
 
     if cursor.rowcount > 0:
-        print(f"Deletion successful. {cursor.rowcount} row(s) deleted.")
+        message = f"Deletion successful. {cursor.rowcount} row(s) deleted."
         # Commit the changes
         conn.commit()
         conn.close()
-        return True
+        return True, 200, message
     else:
+        message = f"No rows deleted. ID {data_id} not found."
         # Commit the changes
         conn.commit()
         conn.close()
-        print(f"No rows deleted. ID {data_id} not found.")
-        return False
+        return False, 400, message
 
 
 def delete_all_data_from_database(database_file, model_id):
@@ -56,14 +56,14 @@ def delete_all_data_from_database(database_file, model_id):
     # Check if any rows were affected
 
     if cursor.rowcount > 0:
-        print(f"Deletion successful. {cursor.rowcount} row(s) deleted.")
+        message = f"Deletion successful. {cursor.rowcount} row(s) deleted."
         # Commit the changes
         conn.commit()
         conn.close()
-        return True
+        return True, 200, message
     else:
         # Commit the changes
         conn.commit()
         conn.close()
-        print(f"No rows deleted.")
-        return False
+        message = f"No rows deleted."
+        return False, 400, message

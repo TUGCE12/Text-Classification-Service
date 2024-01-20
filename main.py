@@ -136,36 +136,60 @@ from Classify import processData as psd
 print("\n#########################\nBaşla")
 dataset = psd.load_dataset_from_db(sm.database_file, 1)
 print(dataset)
-model, tokenizer, label_encoder = psd.load_model_tokenizer_encoder(psd.pretrained_model_name, dataset)
-print(model)
-print(tokenizer)
-print(label_encoder)
-
-train_loader , test_loader, test_data = psd.process_data(dataset=dataset, tokenizer=tokenizer, label_encoder=label_encoder)
-print(train_loader)
-print(test_loader)
-print(test_data)
-
-from Classify import trainEvalSteps as tes
-# Define training parameters
-optimizer, scheduler = tes.define_train_parameters(model=model, train_loader=train_loader)
-
-
-model, epoch_loss = tes.train_step(model=model, train_loader=train_loader, optimizer=optimizer,scheduler=scheduler)
+# model, tokenizer, label_encoder = psd.load_model_tokenizer_encoder(psd.pretrained_model_name, dataset)
 # print(model)
-print(epoch_loss)
+# print(tokenizer)
+# print(label_encoder)
+#
+# train_loader , test_loader, test_data = psd.process_data(dataset=dataset, tokenizer=tokenizer, label_encoder=label_encoder)
+# print(train_loader)
+# print(test_loader)
+# print(test_data)
 
-accuracy, class_report = tes.eval_step(model=model, test_loader=test_loader, test_data=test_data, label_encoder=label_encoder)
-print(accuracy)
-print(class_report)
+# from Classify import trainEvalSteps as tes
+# # Define training parameters
+# optimizer, scheduler = tes.define_train_parameters(model=model, train_loader=train_loader)
+#
+#
+# model, epoch_loss = tes.train_step(model=model, train_loader=train_loader, optimizer=optimizer,scheduler=scheduler)
+# # print(model)
+# print(epoch_loss)
+#
+# accuracy, class_report = tes.eval_step(model=model, test_loader=test_loader, test_data=test_data, label_encoder=label_encoder)
+# print(accuracy)
+# print(class_report)
+#
+# print(gd.get_model_saved_paths(sm.database_file, 1))
+# # Save model performance results to DB
+#
+# # Save model for use later (save to path which define in db)
+# from Classify import saveModelAndResults as saveMR
+#
+# saveMR.save_model(database_file=sm.database_file, model_id=1,model=model, tokenizer=tokenizer,label_encoder=label_encoder)
+#
+# sm.save_model_results_to_database(database_file=sm.database_file, model_id=1,loss=epoch_loss, accuracy=accuracy, classify_report=class_report)
+# print(gd.get_model_results_from_database(database_file=sm.database_file, model_id=1))
 
-print(gd.get_model_saved_paths(sm.database_file, 1))
-# Save model performance results to DB
+#
+# """get model tokenizer label encoder from saved path"""
+# model, tokenizer, label_encoder = psd.load_model_tokenizer_encoder_from_saved_path(database_file=sm.database_file, model_id=1)
+#
+# train_loader, test_loader, test_data = psd.process_data(dataset=dataset, tokenizer=tokenizer, label_encoder=label_encoder)
+# print(train_loader)
+# print(test_loader)
+# print(test_data)
+#
+# from Classify import trainEvalSteps as tes
+# # Define training parameters
+# optimizer, scheduler = tes.define_train_parameters(model=model, train_loader=train_loader)
+#
+#
+# model, epoch_loss = tes.train_step(model=model, train_loader=train_loader, optimizer=optimizer,scheduler=scheduler)
+# # print(model)
+# print(epoch_loss)
 
-# Save model for use later (save to path which define in db)
-from Classify import saveModelAndResults as saveMR
 
-saveMR.save_model(database_file=sm.database_file, model_id=1,model=model, tokenizer=tokenizer,label_encoder=label_encoder)
-
-sm.save_model_results_to_database(database_file=sm.database_file, model_id=1,loss=epoch_loss, accuracy=accuracy, classify_report=class_report)
-print(gd.get_model_results_from_database(database_file=sm.database_file, model_id=1))
+from Classify import classify
+code, message = classify.classify_train_for_api(database_file=sm.database_file, model_id=3, pretrained_model_name='bert')
+print(code, message)
+print(gd.get_model_results_from_database(database_file=sm.database_file, model_id=3))

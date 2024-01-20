@@ -14,45 +14,49 @@ def save_model_to_database(database_file, model_name, model_service):
     :return: no return
     """
     # Connect to SQLite database
-    conn = sqlite3.connect(database_file)
-    cursor = conn.cursor()
+    if model_service.lower() == "classify":
+        conn = sqlite3.connect(database_file)
+        cursor = conn.cursor()
 
-    # Generate dataset_table_name
-    cursor.execute('SELECT COALESCE(MAX(model_id), 0) + 1 FROM MODELS')
-    model_id = cursor.fetchone()[0]
-    dataset_table_name = f"{model_service}_{str(model_id)}"
-    saved_model_path = f"models/model_{dataset_table_name}"
-    saved_tokenizer_path = f"tokenizers/tokenizer_{dataset_table_name}"
-    saved_label_encoder_path = f"encoders/encoder_{dataset_table_name}"
-    model_results_table_name = f"results_{model_service}_{str(model_id)}"
+        # Generate dataset_table_name
+        cursor.execute('SELECT COALESCE(MAX(model_id), 0) + 1 FROM MODELS')
+        model_id = cursor.fetchone()[0]
+        dataset_table_name = f"{model_service}_{str(model_id)}"
+        saved_model_path = f"models/model_{dataset_table_name}"
+        saved_tokenizer_path = f"tokenizers/tokenizer_{dataset_table_name}"
+        saved_label_encoder_path = f"encoders/encoder_{dataset_table_name}"
+        model_results_table_name = f"results_{model_service}_{str(model_id)}"
 
-    # Insert data into MODELS table
-    cursor.execute('''
-        INSERT INTO MODELS (model_name, model_service, saved_model_path, saved_tokenizer_path, saved_label_encoder_path, dataset_table_name, model_results_table_name)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    ''', (model_name, model_service, saved_model_path, saved_tokenizer_path, saved_label_encoder_path, dataset_table_name, model_results_table_name))
+        # Insert data into MODELS table
+        cursor.execute('''
+            INSERT INTO MODELS (model_name, model_service, saved_model_path, saved_tokenizer_path, saved_label_encoder_path, dataset_table_name, model_results_table_name)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', (model_name, model_service, saved_model_path, saved_tokenizer_path, saved_label_encoder_path, dataset_table_name, model_results_table_name))
 
-    # Create dataset table
-    cursor.execute(f'''
-        CREATE TABLE IF NOT EXISTS {dataset_table_name} (
-            id INTEGER,
-            text TEXT,
-            label TEXT
-        )
-    ''')
+        # Create dataset table
+        cursor.execute(f'''
+            CREATE TABLE IF NOT EXISTS {dataset_table_name} (
+                id INTEGER,
+                text TEXT,
+                label TEXT
+            )
+        ''')
 
-    # Create model results table
-    cursor.execute(f'''
-        CREATE TABLE IF NOT EXISTS {model_results_table_name} (
-            loss REAL,
-            accuracy REAL,
-            classification_report TEXT
-        )
-    ''')
-    # Commit changes and close connection
-    conn.commit()
-    conn.close()
-    return model_id
+        # Create model results table
+        cursor.execute(f'''
+            CREATE TABLE IF NOT EXISTS {model_results_table_name} (
+                loss REAL,
+                accuracy REAL,
+                classification_report TEXT
+            )
+        ''')
+        # Commit changes and close connection
+        conn.commit()
+        conn.close()
+        return 200, model_id
+    else:
+        return 400, "For now only classify service is available."
+
 
 
 def save_data_to_database(database_file, model_id, pandas_dataframe):

@@ -7,6 +7,7 @@ import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 from torch.optim import AdamW
 from tqdm import tqdm
+import joblib
 pretrained_model_name = 'bert-base-multilingual-cased'
 from DataBaseManagements import getDataFromDB as gddb
 from DataBaseManagements import getDataFromDB
@@ -36,13 +37,13 @@ def load_dataset_from_db(database_file, model_id):
     :param database_file: sqlite database file path
     :param model_id: int, unique id for your model, can find in MODELS table
     :return: pandas dataframe, dataset
+
+    remove stopwords, punct and number preprocess might be here
     """
     # Load data as pandas dataframe
     dataset_pd = getDataFromDB.get_all_data_from_database_pd(database_file, model_id)
-    print(dataset_pd.head())
     # delete id column
     dataset_pd = dataset_pd.drop(columns=['id'])
-    print(dataset_pd.head())
     return dataset_pd
 
 
@@ -59,6 +60,19 @@ def load_model_tokenizer_encoder(pretrained_model_name: str, dataset):
     label_encoder = LabelEncoder()
     return model, tokenizer, label_encoder
 
+
+def load_model_tokenizer_encoder_from_saved_path(database_file, model_id):
+    model_path, tokenizer_path, label_encoder_path = getDataFromDB.get_model_saved_paths(database_file=database_file,
+                                                                                         model_id=model_id)
+    # Load model
+    loaded_model = BertForSequenceClassification.from_pretrained(model_path)
+
+    # Load tokenizer
+    loaded_tokenizer = BertTokenizer.from_pretrained(tokenizer_path)
+
+    # Load label encoder
+    loaded_label_encoder = joblib.load(f'{label_encoder_path}/encoder')
+    return loaded_model, loaded_tokenizer, loaded_label_encoder
 
 def process_data(dataset, tokenizer, label_encoder, batch_size=8, test_size=0.2, random_state=42):
     """

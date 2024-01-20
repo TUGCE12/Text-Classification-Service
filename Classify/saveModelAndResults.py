@@ -40,3 +40,33 @@ def save_model(database_file, model_id, model, tokenizer, label_encoder):
     joblib.dump(label_encoder, f'{label_encoder_save_path}/encoder')
     print("Model Successfully Saved\n")
 
+
+def check_model_saved_or_not(database_file, model_id):
+    """
+    Check your model has a trained version or not
+    :param database_file:
+    :param model_id:
+    :return:  true model saved, false model not saved
+    """
+    model_path, tokenizer_path, label_encoder_path = getDataFromDB.get_model_saved_paths(database_file=database_file,
+                                                                                         model_id=model_id)
+
+    check_paths = os.path.exists(model_path) and os.path.isdir(model_path) \
+                  and os.path.exists(tokenizer_path) and os.path.isdir(tokenizer_path) \
+                  and os.path.exists(label_encoder_path) and os.path.isdir(label_encoder_path)
+
+    # check path = true all path exist model may was saved, false model not saved ever
+    if check_paths:
+        m_p = os.listdir(model_path)
+        t_p = os.listdir(tokenizer_path)
+        l_e_p = os.listdir(label_encoder_path)
+        if len(m_p) == 0 and len(t_p) == 0 and len(l_e_p) == 0:  # if true all is empty or at least one of them empty
+            # load standart way
+            return False
+        else:
+            # load saved model
+            return True
+    else:
+        # load standart way
+        return False
+
